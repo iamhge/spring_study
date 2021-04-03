@@ -1,0 +1,8 @@
+<html xmlns:th="http://www.thymeleaf.org">
+    <body>
+        <!-- thymeleaf의 장점 : 서버없이 html을 그냥 열어봐도 볼 수 있다. -->
+        <!-- template 엔진이 동작하면, p태그 안의 내용이 'hello ' + ${name}으로 치환된다. -->
+        <!-- ${name} : model의 key값이 name인 것을 꺼내서 치환한다. -->
+        <p th:text="'hello ' + ${name}">hello! empty</p>
+    </body>
+</html>
