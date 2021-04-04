@@ -10,7 +10,16 @@ import java.util.Optional;
 // 서비스는 비즈니스 롤에 의존적으로 설계
 // repository는 단순히 데이터의 이동 등에 맞게 이름을 설계
 public class MemberService {
-    private final MemberRepository memberRepository = new MemoryMemberRepository();
+    private final MemberRepository memberRepository;
+
+    // <DI(Dependency Injection)>
+    // memberRepository를 내부에서 정의하면,
+    // ex) private final MemberRepository memberRepository = new MemoryMemberRepository();
+    // memberService에 이미 정의된 하나의 memberRepository와 밖에서 정의된 서로 다른 instance까지 총 두 개가 생긴다.
+    // 따라서 memberRepository를 외부에서 직접 넣어줄 수 있게 한다.
+    public MemberService(MemberRepository memberRepository) {
+        this.memberRepository = memberRepository;
+    }
 
     /* 회원 가입 */
     public Long join(Member member) {
