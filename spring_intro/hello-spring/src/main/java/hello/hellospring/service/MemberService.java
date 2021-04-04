@@ -3,12 +3,17 @@ package hello.hellospring.service;
 import hello.hellospring.domain.Member;
 import hello.hellospring.repository.MemberRepository;
 import hello.hellospring.repository.MemoryMemberRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 // 서비스는 비즈니스 롤에 의존적으로 설계
 // repository는 단순히 데이터의 이동 등에 맞게 이름을 설계
+
+// @Service : spring이 올라올 때 container에 memberService를 등록시킨다.
+@Service
 public class MemberService {
     private final MemberRepository memberRepository;
 
@@ -17,6 +22,7 @@ public class MemberService {
     // ex) private final MemberRepository memberRepository = new MemoryMemberRepository();
     // memberService에 이미 정의된 하나의 memberRepository와 밖에서 정의된 서로 다른 instance까지 총 두 개가 생긴다.
     // 따라서 memberRepository를 외부에서 직접 넣어줄 수 있게 한다.
+    @Autowired
     public MemberService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
