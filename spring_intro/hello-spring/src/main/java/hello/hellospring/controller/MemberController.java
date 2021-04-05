@@ -17,4 +17,25 @@ public class MemberController {
     public MemberController(MemberService memberService) {
         this.memberService = memberService;
     }
+
+    /*
+    <DI의 3가지 방법>
+    1. 필드 주입
+    * 별로 안좋음.
+      중간에 바꿀 수 있는 방법이 아예 없어서.
+    @Autowired private MemberService memberService;
+    2. setter 주입
+    * 중간에 memberService를 바꿀 일이 없음에도 public하게 노출이 된다.
+    * 호출되지 않아야할 메서드이므로 크리티컬한 문제임.
+    @Autowired
+    public setMemberController(MemberService memberService) {
+        this.memberService = memberService;
+    }
+    3. 생성자 주입
+    * 처음에 spring container올라가는 시점 한번에만 실행되므로 좋다.
+    @Autowired
+    public MemberController(MemberService memberService) {
+        this.memberService = memberService;
+    }
+    */
 }
