@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 
 // @Repository : spring이 올라올 때 가지고 올라옴 (controller, service, repository 를 모두 올림)
-@Repository
+// @Repository // JpaMemberRepository와 bean 겹쳐서 이건 지워준다.
 public class MemoryMemberRepository implements MemberRepository {
     // cf. 실무) 공유되는 변수의 경우 ConcurrentHashMap 사용. (동시성 문제가 발생할 수 있어서)
     private static Map<Long, Member> store = new HashMap<>();
