@@ -5,6 +5,7 @@ import hello.hellospring.repository.MemberRepository;
 import hello.hellospring.repository.MemoryMemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import java.util.Optional;
 
 // @Service : spring이 올라올 때 container에 memberService를 등록시킨다.
 // @Service // 스프링 빈 등록 방법 1)
+@Transactional // jpa를 쓰려면, 데이터를 저장하거나 변경할 때 transaction이 항상 있어야함.
 public class MemberService {
     private final MemberRepository memberRepository;
 
