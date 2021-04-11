@@ -28,10 +28,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationContext;
 import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
@@ -63,6 +65,20 @@ class OwnerControllerTests {
 	private VisitRepository visits;
 
 	private Owner george;
+
+	@Autowired
+	ApplicationContext applicationContext;
+
+	@Test
+	public void getBean() {
+		// IoC 컨테이너 안에 들어있는 모든 bean들의 이름을 가져온다.
+		applicationContext.getBeanDefinitionNames();
+		// bean의 이름으로 getBean을 하면 해당 bean을 가져올 수 있다.
+		OwnerController bean = applicationContext.getBean(OwnerController.class);
+		// test동작 시 OwnerController가 있다면, null이 아닌 객체가 나올 것.
+		assertThat(bean).isNotNull();
+	}
+
 
 	@BeforeEach
 	void setup() {

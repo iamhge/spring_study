@@ -15,15 +15,13 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
@@ -45,9 +43,25 @@ class OwnerController {
 
 	private VisitRepository visits;
 
-	public OwnerController(OwnerRepository clinicService, VisitRepository visits) {
+	private final ApplicationContext applicationContext;
+
+	public OwnerController(OwnerRepository clinicService, VisitRepository visits, ApplicationContext applicationContext) {
 		this.owners = clinicService;
 		this.visits = visits;
+		this.applicationContext = applicationContext;
+	}
+
+	// GetMapping: 요청을 handler로 mapping해주는 annotation
+	@GetMapping("/bean")
+	// ResponseBody: return 해주는 문자열 자체가 응답의 본문이 되도록해주는 annotation
+	@ResponseBody
+	public String bean() {
+		// applicationContext에서 직접 꺼낸 OwnerRepository와
+		// applicationContext가 알아서 주입해준 OwnerRepository instance의 값 비교
+		return "bean: " + applicationContext.getBean(OwnerRepository.class) + "\n"
+			+ "owners: " + this.owners;
+		// 결과: 둘이 같음 -> 싱글톤 스코프: 어떠한 인스턴스 하나를 어플리케이션 전반에서 계속해서 재사용 한다.
+		// spring이 제공하는 IoC 컨테이너는 싱글톤 스코프를 손쉽게 사용할 수 있다.
 	}
 
 	@InitBinder
