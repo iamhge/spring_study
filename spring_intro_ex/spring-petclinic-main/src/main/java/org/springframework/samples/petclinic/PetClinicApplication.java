@@ -25,6 +25,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author Dave Syer
  *
  */
+// @SpringBootApplication 안에 @ComponentScan 이라는 annotation이 있다.
+// 이 annotation이 어디부터 component를 찾아보라고 알려줌.
+// @ComponentScan이 붙어있는 위치에서부터 모든 하위 패키지에 있는 클래스를 찾아서 bean으로 등록한다.
 @SpringBootApplication(proxyBeanMethods = false)
 public class PetClinicApplication {
 

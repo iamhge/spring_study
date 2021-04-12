@@ -15,6 +15,7 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Controller;
@@ -39,18 +40,22 @@ class OwnerController {
 
 	private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
 
+	// 생성자를 통해서 직접 주입받는 방식이 아니라, @Autowired annotation을 사용하면,
+	// IoC container에 있는 bean을 주입받아서 사용할 수 있다. -> DI
+	@Autowired
 	private final OwnerRepository owners;
 
 	private VisitRepository visits;
 
-	private final ApplicationContext applicationContext;
+	// private final ApplicationContext applicationContext;
 
-	public OwnerController(OwnerRepository clinicService, VisitRepository visits, ApplicationContext applicationContext) {
+	public OwnerController(OwnerRepository clinicService, VisitRepository visits) {//, ApplicationContext applicationContext) {
 		this.owners = clinicService;
 		this.visits = visits;
-		this.applicationContext = applicationContext;
+//		this.applicationContext = applicationContext;
 	}
 
+	/*
 	// GetMapping: 요청을 handler로 mapping해주는 annotation
 	@GetMapping("/bean")
 	// ResponseBody: return 해주는 문자열 자체가 응답의 본문이 되도록해주는 annotation
@@ -63,6 +68,7 @@ class OwnerController {
 		// 결과: 둘이 같음 -> 싱글톤 스코프: 어떠한 인스턴스 하나를 어플리케이션 전반에서 계속해서 재사용 한다.
 		// spring이 제공하는 IoC 컨테이너는 싱글톤 스코프를 손쉽게 사용할 수 있다.
 	}
+	*/
 
 	@InitBinder
 	public void setAllowedFields(WebDataBinder dataBinder) {

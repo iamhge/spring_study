@@ -33,6 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
  * @author Sam Brannen
  * @author Michael Isvy
  */
+// repository는 spring data jpa가 제공해주는 기능에 의해서 bean으로 등록된다.
+// 특정한 annotaion이 없더라도 특정한 interface(여기서는 Repository<Owner, Integer>)를 상속받을 경우에
+// 그 interface를 상속받고 있는 구현체를 찾아서
+// 그 class 혹은 interface의 구현체를 내부적으로 만들어 bean으로 등록한다.
 public interface OwnerRepository extends Repository<Owner, Integer> {
 
 	/**
