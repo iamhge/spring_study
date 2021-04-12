@@ -40,20 +40,41 @@ class OwnerController {
 
 	private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
 
-	// 생성자를 통해서 직접 주입받는 방식이 아니라, @Autowired annotation을 사용하면,
+	// 방법 1) field injection
+	// 생성자를 통해서 직접 주입받는 방식이 아니라, @Autowired annotation을 사용하면
 	// IoC container에 있는 bean을 주입받아서 사용할 수 있다. -> DI
-	@Autowired
-	private final OwnerRepository owners;
-
-	private VisitRepository visits;
+//	@Autowired
+//	private OwnerRepository owners;
+//	@Autowired
+//	private VisitRepository visits;
 
 	// private final ApplicationContext applicationContext;
 
-	public OwnerController(OwnerRepository clinicService, VisitRepository visits) {//, ApplicationContext applicationContext) {
+	// 방법 2) 생성자 injection
+	// 이 방법이 가장 권장된다.
+	// 이유 : 필수적으로 사용해야하는 reference 없이는 instance를 만들지 못하도록 강제할 수 있기 때문.
+	private final OwnerRepository owners;
+	private VisitRepository visits;
+	// 과제: OwnerController에 petRepository 주입하기
+	private final PetRepository petRepository;
+
+	// 생성자 하나만 있을 때는 @Autowired 생략 가능
+	public OwnerController(OwnerRepository clinicService, VisitRepository visits, PetRepository petRepository) { //, ApplicationContext applicationContext) {
 		this.owners = clinicService;
 		this.visits = visits;
+		this.petRepository = petRepository;
 //		this.applicationContext = applicationContext;
 	}
+
+	// 방법 3) setter injection
+//	@Autowired
+//	public void setOwners(OwnerRepository owners) {
+//		this.owners = owners;
+//	}
+//	@Autowired
+//	public void setVisits(VisitRepository visits) {
+//		this.visits = visits;
+//	}
 
 	/*
 	// GetMapping: 요청을 handler로 mapping해주는 annotation
