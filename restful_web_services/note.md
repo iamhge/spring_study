@@ -2,13 +2,13 @@
 본 note는 인프런 '[Dowon Lee](https://www.inflearn.com/users/40572)'님의 '[Spring Boot를 이용한 RESTful Web Services 개발](https://www.inflearn.com/course/spring-boot-restful-web-services/dashboard)'을 수강하며 공부한 내용을 바탕으로 작성한 필기입니다.  
 
 ## 목차
-0. [Web Service & Web Application](#0.-Web-Service-&-Web-Application)
-1. [Spring Boot로 개발하는 RESTful Service](#1.-Spring-Boot로-개발하는-RESTful-Service)
-2. [User Service API 구현](#2.-User-Service-API-구현)
-3. [RESTful Service 기능 확장](#3.-RESTful-Service-기능-확장)
-4. [Spring Boot API 사용](#4.-Spring-Boot-API-사용)
-5. [Java Persistence API 사용](#5.-Java-Persistence-API-사용)
-6. [RESTful API 설계 가이드](#6.-RESTful-API-설계-가이드)
+0. [Web Service & Web Application](#0.-web-service-&-web-application)
+1. [Spring Boot로 개발하는 RESTful Service](#1.-spring-boot로-개발하는-restful-service)
+2. [User Service API 구현](#2.-user-service-api-구현)
+3. [RESTful Service 기능 확장](#3.-restful-service-기능-확장)
+4. [Spring Boot API 사용](#4.-spring-boot-api-사용)
+5. [Java Persistence API 사용](#5.-java-persistence-api-사용)
+6. [RESTful API 설계 가이드](#6.-restful-api-설계-가이드)
 
 ## 0. Web Service & Web Application
 
