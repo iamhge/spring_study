@@ -1,9 +1,12 @@
 package com.example.restfulwebservices.user;
 
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@Service
 // service -> 비즈니스 로직
 public class UserDaoService {
     // memory에 데이터 추가할 것이므로 list에 user를 넣는다.
