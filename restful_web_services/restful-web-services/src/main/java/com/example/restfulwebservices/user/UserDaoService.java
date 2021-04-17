@@ -22,7 +22,9 @@ public class UserDaoService {
 
     // 사용자 추가
     public User save(User user) {
+        // 전달 받은 user 객체에 id값이 존재하지 않으면
         if (user.getId() == null) {
+            // 전체 list의 개수 + 1로 id값 설정
             user.setId(++usersCount);
         }
         users.add(user);
@@ -36,6 +38,7 @@ public class UserDaoService {
 
     // 개별 사용자 data 반환
     public User findOne(int id) {
+        // Data를 검색할 수 있는가?
         for (User user: users) {
             if (user.getId() == id) {
                 return user;
