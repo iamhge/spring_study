@@ -46,4 +46,24 @@ public class UserController {
 
         return ResponseEntity.created(location).build(); // ResponseEntity : 사용자에게 전달한다.
     }
+
+    @DeleteMapping("/users/{id}")
+    public void deleteUser(@PathVariable int id) {
+        User user = service.deleteById(id);
+        if (user == null) {
+            throw new UserNotFoundException(String.format("ID[%s] not found", id));
+        }
+    }
+
+    @PutMapping("/users/{id}")
+    public ResponseEntity<User> changeUser(@PathVariable int id, @RequestBody User user) {
+        User changedUser = service.changeById(id, user);
+
+        if (changedUser == null) {
+            throw new UserNotFoundException(String.format("ID[%s] not found", id));
+        }
+
+        return ResponseEntity.accepted().build();
+    }
+
 }
