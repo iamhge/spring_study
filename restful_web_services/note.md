@@ -222,9 +222,9 @@ ex) http://localhost:8080/books/ -> http://localhost:8080/books/1 or http://loca
 
 ## 2. User Service API 구현
 
-## 2.1. User 도메인 클래스 생성
+### 2.1. User 도메인 클래스 생성
 
-## 2.2. 사용자 목록 조회를 위한 API 구현 - GET HTTP Method
+### 2.2. 사용자 목록 조회를 위한 API 구현 - GET HTTP Method
 
 **Bean**  
 : spring에서 선언되어 관리되는 isntance  
@@ -237,8 +237,50 @@ ex) http://localhost:8080/books/ -> http://localhost:8080/books/1 or http://loca
 - bean들을 사용하기 위해서는 container에 등록된 bean의 참조값을 받아와서 사용한다.
 - spring container 혹은 IoC container에 등록된 bean들은 개발자가 프로그램 실행 도중에 변경할 수 없기 때문에 일관성있는 instance로 사용할 수 있다.
 
-
 ## 3. RESTful Service 기능 확장
+### 3.1. 유효성 체크를 위한 Validation API 사용
+
+**validation**
+- @Size(min=<num>) : num size 이상의 데이터만 쓸 수 있다.
+- @Past : 미래 데이터를 쓸 수 없고 과거 데이터만 쓸 수 있다. 
+
+> **※ validation 라이브러리 사용 주의할 점**  
+>
+> spring boot version 2.3.0부터 web에 dependency로 spring-boot-starter-validation이 제외되었다.  
+> 따라서 별도로 pom.xml에 추가해주어야 한다.  
+> 참고) [백기선님 유튜브 강의](https://www.youtube.com/watch?v=cP8TwMV4LjE)
+
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+```
+
+잘못된 데이터를 입력해서 유효성 검사에 걸릴 경우, 400 Bad request error 발생
+
+### 3.2. 다국어 처리를 위한 Internationalization 구현
+프로젝트 전반에 걸쳐 다국어 처리를 해야 하므로, 다국어 처리에 필요한 bean을 SpringBootApplication class에 등록해서 스프링부트가 초기화될 때 메모리에 등록되도록한다.  
+
+`application.yml`에 다음 코드 추가  
+`basename: messages` : 우리가 사용할 다국어 파일의 이름을 messages로 한다.
+```yml
+spring:
+  messages:
+    basename: messages
+```
+`resources/`하위에 다국어 파일 생성  
+![image](https://user-images.githubusercontent.com/59961690/117149355-1c18a480-adf2-11eb-8a41-014a4d2a7e30.png)  
+* messages.properties : default로 설정되는 다국어 파일
+* messages_oo.properties : request Header에서 Accept-Language 의 value를 oo으로 보내면 해당 파일의 다국어가 리턴된다. (oo은 나라별 약칭)
+
+### 3.3. Response 데이터 형식 변환 - XML format
+### 3.4. Response 데이터 제어를 위한 Filtering
+### 3.5. 프로그래밍으로 제어하는 Filtering 방법 - 개별 사용자 
+### 3.6. 프로그래밍으로 제어하는 Filtering 방법 - 전체 사용자 조회
+### 3.7. URI를 이용한 REST API Version 관리
+### 3.8. Request Parameter와 Header를 이용한 API Version 관리
+
 ## 4. Spring Boot API 사용
 ## 5. Java Persistence API 사용
 ## 6. RESTful API 설계 가이드
