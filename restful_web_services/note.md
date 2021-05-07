@@ -274,9 +274,57 @@ spring:
 * messages.properties : default로 설정되는 다국어 파일
 * messages_oo.properties : request Header에서 Accept-Language 의 value를 oo으로 보내면 해당 파일의 다국어가 리턴된다. (oo은 나라별 약칭)
 
+**다국어 처리 참고 링크**  
+[[SpringBoot] i18n 다국어 처리하기 ( MessageSource )](https://victorydntmd.tistory.com/340)
+
 ### 3.3. Response 데이터 형식 변환 - XML format
+지금까지 우리는 client의 요청에 대해 json 포맷으로 response를 전송했다.  
+client가 요청하는 api에 대해 xml 타입으로 전달하자.  
+client가 GET 요청 시 header에 다음과 같이 요청을 보내면 json 형식이 아닌 xml 형식으로 response를 전송한다.  
+![image](https://user-images.githubusercontent.com/59961690/117451329-5bbfc780-af7d-11eb-88ba-a01c775eb054.png)  
+
+maven -> pom.xml 에,  
+gradle -> build.gradle 에 다음 라이브러리를 추가하면, 위와 같이 xml 형식으로 요청시 xml 형식으로 응답한다.  
+```xml
+<dependency>
+    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <artifactId>jackson-dataformat-xml</artifactId>
+    <version>2.10.2</version>
+</dependency>
+```
+
 ### 3.4. Response 데이터 제어를 위한 Filtering
-### 3.5. 프로그래밍으로 제어하는 Filtering 방법 - 개별 사용자 
+
+client가 user정보를 요청했을 때, 비밀번호나 주민등록번호처럼 중요한 데이터 값을 노출시키지 않기 위한 방법?
+1. password와 ssn 필드에서 중요한 값을 다른 문자로 masking 처리해서 전송한다.
+2. password와 ssn 필드를 null로 바꾸어 전송한다.
+-> 여전히 password, ssn 필드는 전송된다는 문제점이 있다.  
+
+***필드에 data값을 남기지 않고 보내는 방법은 없을까?***  
+-> jackson 라이브러리의 @JsonIgnore 혹은 @JsonIgnoreProperties annotation을 추가한다.  
+
+**@JsonIgnore**  
+client에게 숨길 데이터에 달면, client가 요청 시 해당 데이터 필드는 무시되고 전송된다.  
+```java
+@JsonIgnore
+private String password;
+```
+
+**@JsonIgnoreProperties**  
+client에게 숨길 데이터의 class에 달면, client가 요청 시 설정한 데이터 필드는 무시되고 전송된다.  
+```java
+@JsonIgnoreProperties(value={"password", "ssn"})
+public class User {
+  ...
+}
+```
+
+### 3.5. 프로그래밍으로 제어하는 Filtering 방법 - 개별 사용자 조회
+
+**@JsonFilter(<filter 명>)**
+ 
+
+
 ### 3.6. 프로그래밍으로 제어하는 Filtering 방법 - 전체 사용자 조회
 ### 3.7. URI를 이용한 REST API Version 관리
 ### 3.8. Request Parameter와 Header를 이용한 API Version 관리
