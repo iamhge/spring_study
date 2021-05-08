@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Locale;
 
 @RestController
@@ -46,7 +49,13 @@ public class HelloWorldController {
     @GetMapping(path = "/hello-world-internationalized")
     // required = false : 필수가 아니다
     // Accept-Language라는 헤더 값이 포함되지 않았을 경우 자동적으로 default locale 값, 즉 한국어값이 설정된다.
-    public String helloWorldInternationalized(@RequestHeader(name="Accept-Language", required = false) Locale locale) {
+    public String helloWorldInternationalized(@RequestHeader(name="Accept-Language", required = false) Locale locale, HttpServletRequest request) {
+        // 헤더 출력
+        Enumeration<String> headers = request.getHeaderNames();
+        Collections.list(headers).stream().forEach(name -> {
+            Enumeration<String> values = request.getHeaders(name);
+            Collections.list(values).stream().forEach(value -> System.out.println(name + "=" + value));
+        });
         return messageSource.getMessage("greeting.message", null, locale);
     }
 }
