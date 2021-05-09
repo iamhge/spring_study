@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 // ※주의※
 // spring boot ver 2.3.0부터 web에 dependency로
@@ -17,6 +18,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 // @JsonIgnoreProperties(value={"password", "ssn"})
+@NoArgsConstructor // default 생성자 자동 생성
 @JsonFilter("UserInfo")
 public class User {
     private Integer id;
