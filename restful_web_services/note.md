@@ -283,8 +283,8 @@ client가 요청하는 api에 대해 xml 타입으로 전달하자.
 client가 GET 요청 시 header에 다음과 같이 요청을 보내면 json 형식이 아닌 xml 형식으로 response를 전송한다.  
 ![image](https://user-images.githubusercontent.com/59961690/117451329-5bbfc780-af7d-11eb-88ba-a01c775eb054.png)  
 
-maven -> pom.xml 에,  
-gradle -> build.gradle 에 다음 라이브러리를 추가하면, 위와 같이 xml 형식으로 요청시 xml 형식으로 응답한다.  
+maven -> `pom.xml` 에,  
+gradle -> `build.gradle` 에 다음 라이브러리를 추가하면, 위와 같이 xml 형식으로 요청시 xml 형식으로 응답한다.  
 ```xml
 <dependency>
     <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -390,5 +390,188 @@ public class User {
 * 개발하고 제공하는 rest API에 대해서 적절한 개발 도움 문서가 제공되어야 한다.
 
 ## 4. Spring Boot API 사용
+
+### 4.1. Level3 단계의 REST API 구현을 위한 HATEOAS 적용
+**HATEOAS(Hypermedia As the Engine Of Application State)**  
+: 현재 리소스와 연관된(호출 가능한) 자원 상태 정보를 제공  
+
+REST 아키텍처 레벨  
+![image](https://user-images.githubusercontent.com/59961690/117565751-df98c180-b0ed-11eb-8a94-a1447d8f4633.png)  
+* Level 0 : The Swamp of POX (원격 프로시저 호출)
+  > 일반 XML 데이터를 SOAP이나 XML-RPC 등으로 전송한다. POST 메소드만 사용하며, 서비스간에 단일 POST 메소드로 XML 데이터를 교환한다. 초창기 SOA 애플리케이션 제작 시 흔히 사용된 방식이다.
+* Level 1 : Resources (Rest 리소스)
+  > 함수에 파라미터를 넘기는 대신 REST URI를 이용한다. 레벨 0 처럼 POST 메소드 하나밖에 사용하지 않지만, POST 메소드로 서비스간 통신을 하면서 복잡한 기능을 여러 리소스로 분산시킨다는 점에서 한 단계 발전된 형태라고 볼 수 있다.
+* Level 2 : HTTP Verbs (추가 HTTP 메소드)
+  > 레벨2는 POST 이외에 GET, HEAD, DELETE, PUT 메소드를 추가적으로 사용한다. HTTP 요청시 여러 메소드를 사용하여 다양한 리소스를 제공할 수 있다는 점에서 REST의 진정한 유스 케이스라 할 수 있다.
+* Level 3 : Hypermedia Controls (HATEOAS)
+  > 애플리케이션 상태 엔진으로서의 하이퍼미디어는 리차드슨 성숙도 모델의 가장 성숙한 단계로서, 요청에 대한 하이퍼미디어 응답 속에 클라이언트가 다음에 취해야 할 액션에 관한 상태 정보가 담겨 있다. 레벨 3은 발견 가능성(Discoverability)이 높고, 응답 자체에 대한 필요한 내용이 고스란히 담겨 있다. 리소스 뿐만 아니라 그 이상의 부가적인 정보까지 나타낸다는 점에서 HATEOAS가 진정한 REST냐 하는 문제는 아직도 논란의 여지가 있다.
+
+출처) [[Spring] Level3 REST API 구현을 위한 HATEOAS 적용](https://transferhwang.tistory.com/125)  
+
+`pom.xml`에 hateoas dependency 추가  
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-hateoas</artifactId>
+</dependency>
+<!-- 강의에서는 추가하지 않았는데 나는 아래 dependency 추가해야 에러가 안남-->
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-hateoas</artifactId>
+</dependency>
+```
+
+기능|spring 2.1.8 version 이하|spring 2.2 version 이상|
+|---|---|---|
+|추가 자원|Resource|EntityModel|
+|추가 자원 link|ControllerLinkBuilder|WebMvcLinkBuilder|
+
+**HATEOAS**  
+* 하나의 리소스에서 파생할 수 있는 추가적인 작업을 확인할 수 있다.
+* 현재 있는 리소스에서 추가로 어떠한 다른 작업을 할 수 있는지 link할 수 있다.
+* 사용자의 입장에서 다양한 정보를 한번에 얻을 수 있다는 장점
+
+### 4.2. REST API Documentation을 위한 Swagger 사용
+
+**Swagger**
+* 개발자 도움말 필드를 생성
+* rest 웹 서비스에서 설계, 빌드, 문서화, 사용에 관련된 작업을 지원해주는 오픈소스 프레임워크
+* 사용자, 개발자에 관련된 document 페이지 생성
+* 아파치 2.0 라이브러리 사용
+* 선언시켰던 클래스, 컨트롤러를 화면에 보기 좋게 표시해주는 역할을 한다. 
+
+**강의 내용**
+`pom.xml`에 dependency 추가  
+```xml
+<dependency>
+  <groupId>io.springfox</groupId>
+  <artifactId>springfox-swagger2</artifactId>
+  <version>2.9.2</version>
+</dependency>
+<dependency>
+  <groupId>io.springfox</groupId>
+  <artifactId>springfox-swagger-ui</artifactId>
+  <version>2.9.2</version>
+</dependency>
+```
+* `springfox-swagger-ui` : 개발하고 있는 documentation을 시각화해주는 도구
+
+**+) 가장 최신인 2.10.5 version을 사용하지 않는 이유 (2021-05-09 기준)**  
+2.10 대 version은 3.0을 위한 중간단계라서 사용하지 않는 것을 추천.  
+참고) [springfox issue page](https://github.com/springfox/springfox/issues/3336)  
+
+***Spring boot 최신 version(2.4.4)의 경우 위의 방법에서 Swagger 오류가 발생한다.***  
+
+**Solution**
+`pom.xml`에 위 강의 내용의 dependency를 빼고, 아래의 dependency 추가  
+```xml
+<dependency>
+  <groupId>io.springfox</groupId>
+  <artifactId>springfox-boot-starter</artifactId>
+  <version>3.0.0</version>
+</dependency>
+```
+* 웹브라우저에서 확인할 수 있다. 
+* http://localhost:8088/v2/api-docs : Swagger file에 의해서 만들어진 내용이 json 형식으로 보여진다.
+* http://localhost:8088/swagger-ui/ : html 형식으로 보여진다.
+
+**api-docs**  
+![image](https://user-images.githubusercontent.com/59961690/117573821-f8689d80-b114-11eb-8755-584c5f3ccece.png)  
+* info : swagger-ui page 상단의 api documentation, license 정보 등이 표시된다.
+* host : 기본 IP, PORT
+* path : Swagger를 사용하는 application이 제공하는 url값을 확인할 수 있다.
+* definations : 현재 Swagger에서 사용하고 있는 다양한 instance들을 만들 때 사용된 객체들.
+
+**swagger-ui**  
+![image](https://user-images.githubusercontent.com/59961690/117573812-edae0880-b114-11eb-9c08-4ec9facc39f4.png)  
+
+### 4.3. Swagger Documentation 구현 방법
+Swagger Documentation을 customize한다.  
+
+**변경 내용**
+* Contact
+* ApiInfo
+* Produces and Consumes
+
+**@ApiModel(description = <String>), @ApiModelProperty(notes = <String>)**  
+: property, field 별로 documentation을 사용할 수 있는 설명을 기재한다.  
+* api-docs, swagger ui 에서 모두 확인할 수 있다. 
+
+### 4.4. REST API Monitoring을 위한 Actuator 설정
+
+`pom.xml`에 dependency 추가  
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+```
+![image](https://user-images.githubusercontent.com/59961690/117576925-97e05d00-b122-11eb-8f8d-7ad16e68ac95.png)  
+* 접속 url : http://localhost:8088/actuator
+* 쓸 수 있는 모니터링의 전체 목록을 확인 가능하다.
+* 각 field 안의 href를 접속하면 해당 field에 대해 자세히 확인이 가능하다.
+
+더많은 정보를 확인하기 위해 application.yml 파일에 몇가지 설정을 한다.  
+`application.yml`에 다음 코드 추가  
+```yml
+menagement:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+```  
+![image](https://user-images.githubusercontent.com/59961690/117577201-c579d600-b123-11eb-9633-572fc6b7e7df.png)  
+* 보다 다양한 정보를 확인할 수 있다.
+
+### 4.5. HAL Browser를 이용한 HATEOAS 기능 구현
+
+**HAL(Hypertext Application Language) Browser**
+* REST API 설계시 response 정보에 부가적인 정보를 추가해서 제공하는 Service
+* API resource들 사이에서 쉽게 일관적인 hyperlink를 제공하는 방식 
+* API 설계시 HAL을 도입하게 되면 API 간에 쉽게 검색이 가능하다.
+* 따라서 해당 API를 사용하는 다른 개발자들에게 좀 더 나은 개발환경 제공
+* HAl을 API response message에 적용하게 되면 그 message가 json 형식이건, xml 형식이건 API를 쉽게 사용할 수 있는 부가적인 정보(메타 정보)를 hyperlink 형식으로 간단하게 포함할 수 있다.
+
+![image](https://user-images.githubusercontent.com/59961690/117577565-438aac80-b125-11eb-86f5-d67be7841529.png)  
+* 우리가 제공하려는 특정한 resource의 정보를 link로 추가해서 제공할 수 있다.
+* resource를 외부에 공개하기 위해서 RESTful service를 사용해 왔던 것이다. 해당하는 요청 작업에 부가적으로 사용할 수 있는 또 다른 resource를 연결해서 보여주기 위해 html의 link, 즉 hypertext 기능을 사용한다.
+
+`pom.xml`에 dependency 추가  
+```xml
+<dependency>
+  <groupId>org.springframework.data</groupId>
+  <artifactId>spring-data-rest-hal-browser</artifactId>
+  <version>3.3.2.RELEASE</version> <!-- spring boot 2.4.x의 경우 hal의 version도 명시해주어야 한다. -->
+</dependency>
+```
+
+![image](https://user-images.githubusercontent.com/59961690/117579023-1097e700-b12c-11eb-9258-3f65588c088c.png)  
+* 접속 url : http://localhost:8088/browser/index.html
+* Explorer : actuator, actuator metrics, actuator metrics memory 등을 입력해서 쉽게 부가적인 정보를 확인할 수 있다.
+* 이전에 HATEOAS 기능을 이용해서 resource를 요청할 때 link 사용이 가능한 resource를 연결했다. 
+* Hal은 이러한 link정보를 json으로 표현할 수 있는 표준
+  > example
+  >> http://localhost:8088/browser/index.html#/actuator/
+  >> http://localhost:8088/browser/index.html#/actuator/metrics/
+  >> http://localhost:8088/browser/index.html#/actuator/metrics/jvm.memory.max
+
+**Hal browser의 장점**  
+* rest 자원을 표시하기 위한 자료구조를 그 때 그 때 생성하지 않더라도 Hateoas 기능을 사용할 수 있다.
+  * HATEOAS를 사용했을 때는 HATEOAS 정보를 추가하기 위해 link 객체를 생성했다.
+    ```java
+    // UserController.java
+    // HATEOAS
+    EntityModel<User> model = new EntityModel<>(user);
+    // 현재 클래스가 가지고 있는 retrieveAllUsers(전체 사용자 목록 보기) 메소드를
+    WebMvcLinkBuilder linkTo = linkTo(methodOn(this.getClass()).retrieveAllUsers());
+    // all-users와 link 한다.
+    model.add(linkTo.withRel("all-users"));
+    ```
+  * 반면 Hal은 필요한 resource를 직접 그 때 그 때 작업하지 않더라도 추가로 사용할 수 있는 link가 자동으로 설계된다.
+
+### 4.6. Spring Security를 이용한 인증 처리
+
+### 4.7. Configuration 클래스를 이용한 사용자 인증 처리
+
 ## 5. Java Persistence API 사용
 ## 6. RESTful API 설계 가이드
