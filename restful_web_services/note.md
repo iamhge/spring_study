@@ -321,13 +321,73 @@ public class User {
 
 ### 3.5. 프로그래밍으로 제어하는 Filtering 방법 - 개별 사용자 조회
 
-**@JsonFilter(<filter 명>)**
+**@JsonFilter(<filter 명>)**  
+: filter ID를 문자열로 지정한다. 일단 이 annotation을 사용하면 무조건 FilterProvider와 해당 ID를 처리하는 필터를 제공해야 한다.  
  
+**SimpleBeanPropertyFilter**  
+: properties를 제어한다. 필드를 가지고 있는 클래스에 제어하고 싶은 객체가 있을 경우 filter 클래스를 사용하면 쉽게 제어할 수 있다.  
 
+**SimpleBeanPropertyFilter.filterOutAllExcept(<필드 명>, ...)**  
+: 지정된 필드들만 JSON 변환한다. 알 수 없는 필드는 무시한다. 이 방식을 권장한다. 명백히 검증된 필드만 내보낸다.  
+
+**addFilter(<filter를 적용할 bean의 이름>, <filter>)**  
+
+**setFilters(filters)**  
+: filter를 적용한다.
+
+**MappingJacksonValue(java.lang.Object value)**  
+: 주어진 POJO를 연속적으로 wrapping할 새로운 instance를 생성한다.  
+
+**POJO(Plain Old Java Object)**  
+: 오래된 방식의 간단한 자바 오브젝트라는 말로서 Java EE 등의 중량 프레임워크들을 사용하게 되면서 해당 프레임워크에 종속된 "무거운" 객체를 만들게 된 것에 반발해서 사용되게 된 용어.  
+본래 자바의 장점을 살리는 '오래된' 방식의 '순수한' 자바객체를 의미한다.  
 
 ### 3.6. 프로그래밍으로 제어하는 Filtering 방법 - 전체 사용자 조회
+
 ### 3.7. URI를 이용한 REST API Version 관리
+카카오, 페이스북 developer 등에서 제공하는 API를 살펴보면 v1이 URI에 들어가있다. 이는 version을 URI에 명시한 것.  
+우리도 그와 같이 URI에 version을 명시하도록 한다.  
+
+**URI**
+* ex) `@GetMapping("/v1/user/{id}")`
+* URI에 version을 명시한다.
+* request : http://localhost:8088/admin/v{version}/users/{id}
+
 ### 3.8. Request Parameter와 Header를 이용한 API Version 관리
+
+**Request Parameter**
+* ex) `@GetMapping(value = "/user/{id}/", params = "version=1")`
+* 사용하려는 URI값 뒤에 request parameter값을 전달함으로써 version을 명시해준다. 
+* `/user/{id}/` : 뒤에 version 정보가 전달되어야 하기 때문에 마지막에 '/'로 끝난다.
+* request : http://localhost:8088/admin/users/{id}/?version={version}
+
+**Header**
+* ex) `@GetMapping(value = "/user/{id}", headers = "X-API-VERSION=1")`
+* Header 값을 이용한 version 관리한다.
+* request : http://localhost:8088/admin/users/{id}
+* header : X-API-VERSION={version}
+
++) @GetMapping에 두가지 이상 정보가 올 때는 path를 'value = ' 으로 명시해준다.  
+
+**MIME(Multi-purpose Internet Mail Extension) type**  
+* ex) `@GetMapping(value = "/user/{id}/", produces = "application/vnd.company.appv1+json")`
+* 이메일과 함께 전송되는 메일을 텍스트 문자로 전환해서 이메일 서버에 전달하기 위한 방법
+* 최근에는 웹을 통해서 여러가지 파일을 전달하기 위해서 사용되는 일종의 파일 지정 형식
+* request : http://localhost:8088/admin/users/{id}
+* header : Accept=application/vnd.company.appv{version}+json
+
+**Version 관리 기능**
+* 단순하게 사용자에게 보여줄 항목을 제한하는용도가 아닌, rest API의 설계가 변경되거나 application의 구조가 바뀔 때도 version을 변경해서 사용해야 한다. 
+* 사용자에는 어떤 API를 사용해야하는지 적절히 가이드를 명시해주어야한다. 
+* URI, Request Parameter : URI 요청 정보를 변경하거나 뒤에 parameter를 변경하면 되므로, 일반 브라우저에서도 실행이 가능하다.
+* header, MIME type : 일반 인터넷 웹 브라우저에서는 실행할 수 없다. 별도의 프로그램을 이용해야한다.
+
+**Version 관리에서 중요한 점**
+* URI에 너무 과도하게 정보를 표기하는 것은 지양한다.
+* 잘못된 Header값을 사용하지 않도록 한다.
+* 인터넷 웹 브라우저의 캐시 기능으로 인해서 지정한 값이 제대로 반영되지 않을 수 있다.
+* API의 적절한 용도에 따라서 웹 브라우저에서 실행될 수 있어야 한다.
+* 개발하고 제공하는 rest API에 대해서 적절한 개발 도움 문서가 제공되어야 한다.
 
 ## 4. Spring Boot API 사용
 ## 5. Java Persistence API 사용
