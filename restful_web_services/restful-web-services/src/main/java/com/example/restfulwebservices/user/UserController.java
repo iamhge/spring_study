@@ -1,5 +1,7 @@
 package com.example.restfulwebservices.user;
 
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -7,6 +9,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
+
+// 아래의 method를 사용하기 위해서 앞에 WebMvcLinkBuilder라는 클래스명을 붙이지 않아도 된다.
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class UserController {
@@ -25,14 +31,23 @@ public class UserController {
     // http를 통해서 request되는 data들은 모두 String 형태이다.
     // 파라미터에서 String이라고 선언하지 않고 int라고 선언하면, String이 자동으로 int로 converting 된다.
     @GetMapping("/users/{id}")
-    public User retrieveUser(@PathVariable int id) {
+    public EntityModel<User> retrieveUser(@PathVariable int id) {
         // 단축키 ctrl+art+v
         User user = service.findOne(id);
         if (user == null) {
             throw new UserNotFoundException(String.format("ID[%s] not found", id));
         }
 
-        return user;
+        // HATEOAS
+        EntityModel<User> model = new EntityModel<>(user);
+//        WebMvcLinkBuilder linkTo = WebMvcLinkBuilder.linkTo(
+//                WebMvcLinkBuilder.methodOn(this.getClass()).retrieveAllUsers());
+        // 현재 클래스가 가지고 있는 retrieveAllUsers(전체 사용자 목록 보기) 메소드를
+        WebMvcLinkBuilder linkTo = linkTo(methodOn(this.getClass()).retrieveAllUsers());
+        // all-users와 link 한다.
+        model.add(linkTo.withRel("all-users"));
+
+        return model;
     }
 
     @PostMapping("/users")
