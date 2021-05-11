@@ -10,6 +10,21 @@ spring:
     basename: messages # 우리가 사용할 다국어 파일의 이름을 messages로 한다.
     fallback-to-system-locale: false
 
+#  security:
+#    user:
+#      name: username
+#      password: passw0rd
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+
+  jpa:
+    show-sql: true
+
+  h2:
+    console:
+      enabled: true
+
 management:
   endpoints:
     web:
