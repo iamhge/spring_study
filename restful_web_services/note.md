@@ -570,8 +570,239 @@ menagement:
   * 반면 Hal은 필요한 resource를 직접 그 때 그 때 작업하지 않더라도 추가로 사용할 수 있는 link가 자동으로 설계된다.
 
 ### 4.6. Spring Security를 이용한 인증 처리
+지금까지 REST API는 웹브라우저 혹은 postman과 같은 client test program을 이용해서 결과를 확인했다.  
+일반적으로 공개되어도 좋은 정보가 아닌, 중요한 리소스의 경우 보안에 문제가 생길 수 밖에 없는 구조였다.  
+
+**REST API application이 인증을 처리하기 위한 방법**
+1. 토큰을 이용한 방식 
+2. ID와 비밀번호를 이용한 방식
+
+**Spring security**  
+`pom.xml`에 dependency 추가  
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+```
+
+![Screenshot from 2021-05-11 20-00-40](https://user-images.githubusercontent.com/59961690/117825957-b709f680-b2aa-11eb-82da-2d31ce5edbda.png)  
+* log 파일을 함께 확인한다.
+* spring security library를 사용하면 현재 사용하고 있는 프로젝트에서 사용할 수 있는 password를 자동으로 생성해주기 때문이다.
+* 웹서비스를 호출하기 위해서 이 password가 필요하다.
+
+![Screenshot from 2021-05-11 20-02-39](https://user-images.githubusercontent.com/59961690/117825963-b83b2380-b2aa-11eb-9d5d-a227e43107d7.png)  
+* 인증이 되지 않은 상태에서 평소처럼 resource를 요구하면 에러가 발생한다. 
+
+![Screenshot from 2021-05-11 20-04-48](https://user-images.githubusercontent.com/59961690/117825969-b96c5080-b2aa-11eb-97ac-c8d07f9e1d57.png)  
+* URI 값에 인증 정보를 같이 전달하면 보안상 큰 문제가 발생하기 때문에 일반적으로 URI값에는 인증 정보를 포함하지 않는다.
+* Header값에 인증 정보를 포함할 수 있다.
 
 ### 4.7. Configuration 클래스를 이용한 사용자 인증 처리
+Spring security에 의해서 자동으로 생성된 password가 아닌, 개발자가 직접 지정한 ID와 password를 사용해서 인증 처리한다.
+
+**`application.yml`에 지정**  
+`application.yml`에 다음 코드 추가  
+```yml
+spring:
+  security:
+    user:
+      name: username
+      password: passw0rd
+```  
+* 원하는 id와 password를 기입한다.
+
+결과  
+![Screenshot from 2021-05-11 20-57-54](https://user-images.githubusercontent.com/59961690/117825977-bbceaa80-b2aa-11eb-8949-d953035338e4.png)
+* id와 password를 application.yml에 고정적으로 지정하게 되면 id나 password를 변경할 때마다 서버를 재기동해야한다.
+* 따라서 고정된 id를 사용하는 방식이 아닌 database 등에서 사용자 정보를 가져오는 방식으로 프로그램을 수정해야한다.
+
+**Configuration**  
+WebSecurityConfigurerAdapter를 상속받아 로그인 처리를 구현한다.  
+* spring-cloud-bus 기능을 이용하게 되면 서버의 재부팅 없이 업데이트가 가능하다.
+
+결과
+![Screenshot from 2021-05-11 21-26-30](https://user-images.githubusercontent.com/59961690/117825980-bc674100-b2aa-11eb-9dc1-d42c641248a9.png)
 
 ## 5. Java Persistence API 사용
+
+### 5.1. Java Persistence API의 개요
+
+**JAP(Java Persistence API)**  
+- 자바 ORM 기술에 대한 API 표준 명세
+- 자바 어플리케이션에서 관계형 데이터베이스를 사용하는 방식을 정의한 인터페이스
+  - JPA는 말 그대로 '인터페이스'이다.
+  - 인터페이스는 특정한 메소드의 구현체가 존재하지 않는 규약이다.
+  - 우리가 특정 기능을 사용할 수 있는 라이브러리가 아닌, 자바 어플리케이션에서 관계형 데이터 베이스를 어떻게 사용하면 될 지 정의해 놓은 인터페이스이자 약속이다.
+  - JPA는 단순히 명세서이기 때문에 구현된 메소드가 없고, 선언만 존재한다.
+- EntityManager를 통해 CRUD 처리
+
+**Hibernate**  
+- JPA를 구현한 대표적인 구현체
+- 객체 관계 mapping(ORM) framework
+- JPA의 구현체, 인터페이스를 직접 구현한 라이브러리
+- 직관적이며, 비즈니스 로직에 집중할 수 있다.
+- ORM을 위한 라이브러리임과 동시에, EntityManager를 구현 시킨 클래스 집합체
+
+**ORM(Object Relationship Mapping)**  
+- 재사용성이 좋다.
+- 복잡한 데이터베이스의 쿼리를 모른다고 하더라도 자바의 객체와 데이터베이스의 entity가 자동으로 mapping되고 있기 때문에 간단한 데이터베이스 어플리케이션 개발에 많이 사용된다.
+
+**Spring Data JPA**
+- Spring Module
+- 개발자가 JPA를 좀 더 쉽고 편하게 사용할 수 있게 도와준다.
+- JPA를 추상화한 Repository 인터페이스 제공
+
+### 5.2. JPA를 사용을 위한 Dependency 추가와 설정
+
+`pom.xml`에 dependency 추가  
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-data-jpa</artifactId>
+</dependency>
+<dependency>
+  <groupId>com.h2database</groupId>
+  <artifactId>h2</artifactId>
+  <scope>runtime</scope>
+</dependency>
+```
+
+`application.yml`에 다음 코드 추가  
+```yml
+spring:
+#  security:
+#    user:
+#      name: username
+#      password: passw0rd
+      
+  jpa:
+    show-sql: true
+  
+  h2:
+    console:
+      enabled: true
+```
+* sql에 관련된 log 파일을 출력
+  * 개발의 편의성을 위해 어떤 쿼리가 실행되었는지 log 파일에 출력시킨다.
+* h2 console이라는 application을 실행한다. 
+
+![Screenshot from 2021-05-12 00-24-45](https://user-images.githubusercontent.com/59961690/117844764-ea548180-b2ba-11eb-8ca0-114528f4525d.png)  
+* http://localhost:8088/h2-console
+* spring security, config에 의해서 맨 처음에는 로그인 화면이 출력된다.
+  * 앞서 설정한 ID와 password를 입력하면 접근이 가능하다.
+  * 하지만 접근 후에도 `Test Connection` 클릭시 에러 페이지가 출력되므로 security config 설정을 바꾸도록 한다.
+    * `SecurityConfig` 클래스에 configure(HttpSecurity http)를 override한다.
+    * /h2-console/** 에 대한 http 요청을 모두 통과한다 -> permitAll()
+* JDBC URL을 jdbc:h2:mem:testdb 로 변경한다.
+* `Test Connection`을 누른다.
+  * 이 때, database "mem:testdb"를 찾을 수 없다는 오류가 발생한다면 다음과 같이 해결한다.
+    * 스프링부트에서는 내부적으로 아래와 같은 정보를 자동으로 생성한다.
+      > Driver Class : org.h2.Driver  
+      > JDBC URL : jdbc:h2:mem:testdb  
+      > Username : sa  
+      > Password :  
+    * 그러나 최신 h2 버전에서는 데이터베이스를 미리 생성하는 것을 방지하도록 설정되어있다.
+    * 따라서 h2 버전을 1.4.197 이하를 사용하거나, `application.yml`에 다음 코드를 추가한다.
+      ```yml
+      spring:
+        datasource:
+          url: jdbc:h2:mem:testdb
+        jpa:
+          show-sql: true
+        h2:
+          console:
+            enabled: true
+      ```
+
+![Screenshot from 2021-05-12 00-25-41](https://user-images.githubusercontent.com/59961690/117844769-ec1e4500-b2ba-11eb-9f88-bc59ff250d1f.png)  
+* `Connect`를 클릭한다.
+
+### 5.3. Spring Data JPA를 이용한 Entity 설정과 초기 데이터 생성
+user 도메인 클래스와 Entity를 연동한다.  
+
+**@Entity**  
+: 해당하는 클래스 이름을 가지고 데이터베이스에 테이블을 생성하고, 클래스에 선언되어있는 필드의 정보를 가지고 테이블 생성에 필요한 컬럼 정보로 사용한다.  
+
+**@Id**  
+: 기본키 값을 설정한다.  
+
+**@GeneratedValue**  
+: 자동 생성되는 키 값 
+
+**위와 같이 Entity, Id, GeneratedValue annotation을 사용하는 이유**
+* table을 생성하기 위해 create table user {...} 와 같은 명령어를 실행할 필요가 없다.
+* 자바 object 선언만 시켜서 데이터베이스에 해당 객체와 mapping되는 작업을 진행할 수 있다.
+* table에 저장되어있는 데이터 값도 자바의 object형태로 가져올 수 있다.
+
+**insert data**
+* `resources/`에 확장자명이 `.sql`인 파일을 생성한다.
+* `resources/`안의 `.sql` 파일을 스프링 부트가 처음 로딩할 때 초기 데이터로 생성한다.
+* 해당 파일에서 아래 예시와 같은 sql 명령어를 통해 데이터를 삽입하면 서버 구동 시 data가 삽입된다.
+  ```sql
+  insert into user values(1, sysdate(), 'User1', 'test1111', '701010-1111111');
+  ```
+
+### 5.4. JPA Service 구현을 위한 Controller, Repository 생성
+Spring Data JPA는 일반적인 JPA 기능과 달리 entity를 제어하기 위해서 JPA EntityManager를 사용하지 않고, repository라는 interface를 선언하게 되어있다.  
+단순히 repository interface를 선언하여 CRUD에 관련된 메소드를 사용할 수 있다.  
+
+**@Repository**  
+: bean의 타입. 데이터베이스에 관련된 형태의 bean
+
+**JpaRepository<T,ID> 상속**  
+* T : 현재 지정한 클래스가 어떠한 type의 객체를 다룰 것인지 명시한다.
+* ID : T의 기본키의 type을 명시한다.
+* 특별하게 데이터베이스에 관련된 작업(ex. select)없이 결과값을 볼 수 있다.
+
+### 5.5. JPA를 이용한 사용자 목록 조회 - GET HTTP Method
+
+**PagingAndSortingRepository<T, ID>**  
+* JpaRepository<T,ID>가 상속하고 있는 interface이다.
+* findAll에 관련된 메소드가 선언되어있다.
+
+**CrudRepository<T, ID>**  
+* PagingAndSortingRepository<T, ID>가 상속하고 있는 interface이다.
+* findById(ID var1) 메소드가 선언되어 있다.
+
+**`UserJpaController.java`**
+```java
+@GetMapping("/users/{id}")
+    public EntityModel<User> retrieveUser(@PathVariable int id) {
+        // 데이터가 존재하지 않을 경우도 있으므로 Optional 타입으로 데이터를 받는다.
+        Optional<User> user = userRepository.findById(id);
+
+        // user 안에 데이터가 존재하지 않는다면
+        if (!user.isPresent()) {
+            throw new UserNotFoundException(String.format("ID[%s] not found", id));
+        }
+
+        // HATEOAS
+        // 반환시켜주고자하는 user 객체에 retrieveAllUsers(전체 user 보기) 링크를 추가한다.
+        EntityModel<User> resource = new EntityModel<>(user.get());
+        WebMvcLinkBuilder linkTo = linkTo(methodOn(this.getClass()).retrieveAllUsers());
+        resource.add(linkTo.withRel("all-users"));
+
+        return resource;
+    }
+```
+* Optinal<T> findById(ID var1)  
+  : return type이 Optional 데이터이다.
+  * Optional 데이터인 이유 : 데이터가 검색어에 따라서 존재할 수도, 존재하지 않을 수도 있기 때문에 선택적인 데이터 값을 반환한다.
+* isPresent()  
+  : user 안에 데이터가 존재하는가
+* get()  
+  : 데이터 값이 실제로 존재할 경우에만 데이터 값을 반환한다.
+* HATEOAS
+  : 전체 user 보기 주소 값을 link한다.
+  * HATEOAS 작업을 하기 위해서 해당하는 주소 값을 직접 명시하지 않고, 그 주소 값에 해당하는 메소드의 이름만으로 link 연결이 된다.
+
+### 5.6. JPA를 이용한 사용자 추가와 삭제 - POST/DELETE HTTP Method
+
+### 5.7. 게시물 관리를 위한 Post Entity 추가와 초기 데이터 생성
+
+### 5.8. 게시물 조회를 위한 Post Entity와 User Entity와의 관계 설정
+
+### 5.9. JPA를 이용한 새 게시물 추가 - POST HTTP Method
+
 ## 6. RESTful API 설계 가이드
