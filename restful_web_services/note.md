@@ -399,14 +399,38 @@ REST 아키텍처 레벨
 ![image](https://user-images.githubusercontent.com/59961690/117565751-df98c180-b0ed-11eb-8a94-a1447d8f4633.png)  
 * Level 0 : The Swamp of POX (원격 프로시저 호출)
   > 일반 XML 데이터를 SOAP이나 XML-RPC 등으로 전송한다. POST 메소드만 사용하며, 서비스간에 단일 POST 메소드로 XML 데이터를 교환한다. 초창기 SOA 애플리케이션 제작 시 흔히 사용된 방식이다.
+  * REST 방식으로 어플리케이션이 고려되었다기 보다는, 기존의 리소스를 웹서비스 형태로 제공해서 단순히 URI만 mapping한 형태
+  * 굳이 동작값, 상태값을 URI에 표시한다. -> 불필요하다.
+  > ex)  
+  > http://server/getPosts  
+	> http://server/deletePosts  
+	> http://server/doThis  
 * Level 1 : Resources (Rest 리소스)
   > 함수에 파라미터를 넘기는 대신 REST URI를 이용한다. 레벨 0 처럼 POST 메소드 하나밖에 사용하지 않지만, POST 메소드로 서비스간 통신을 하면서 복잡한 기능을 여러 리소스로 분산시킨다는 점에서 한 단계 발전된 형태라고 볼 수 있다.
+  * 일정한 패턴을 가지고 작성되었지만, HTTP의 메소드 별로 서비스를 구분해서 사용하지는 않는다.
+  * 즉, 리소스 형태와 작업의 종류에 맞춰 적적한 HTTP 메소드를 지정하고 있지 않다. 
+  * 사용자 요청을 단순히 GET, POST만으로 처리하고, 모든 반환 값을 error 혹은 200 OK라는 status code로 반환하는 단순한 형태
+  * URI는 적절하게 구분되어있는 것 같지만, 아직까지도 HTTP 메소드에 맞춰서 상태값을 요청하거나 처리하지 않는 단계
+  > ex)
+  > http://server/accounts
+  > http://server/accounts/10
 * Level 2 : HTTP Verbs (추가 HTTP 메소드)
   > 레벨2는 POST 이외에 GET, HEAD, DELETE, PUT 메소드를 추가적으로 사용한다. HTTP 요청시 여러 메소드를 사용하여 다양한 리소스를 제공할 수 있다는 점에서 REST의 진정한 유스 케이스라 할 수 있다.
+  * Level 1 + HTTP 메소드
+  * 우리가 제공하려는 리소스를 용도와 상태에 맞춰서 적절하게 HTTP 메소드를 설계하고 서비스한다.
+  * 리소스가 변경할 수 없는 단순한 읽기 전용의 데이터일 경우 HTTP GET 메소드를 사용하고, 새로운 리소스를 추가할 때는 POST, 리소스의 상태를 변경할 때는 PUT, 리소스를 삭제하고자할 때는 DELETE 메소드를 사용해서 서비스한다.
+  * 데이터를 조작하는 CRUD와 같은 개념을 HTTP 메소드인 GET, POST, PUT, DELETE에 매칭해서 서비스한다.
+  * HTTP 메소드를 이용해서 리소스 상태를 구분해서 서비스하면, 비슷하거나 같은 URI라 하더라도 메소드를 달리해서 다른 서비스를 제공할 수 있다.
 * Level 3 : Hypermedia Controls (HATEOAS)
   > 애플리케이션 상태 엔진으로서의 하이퍼미디어는 리차드슨 성숙도 모델의 가장 성숙한 단계로서, 요청에 대한 하이퍼미디어 응답 속에 클라이언트가 다음에 취해야 할 액션에 관한 상태 정보가 담겨 있다. 레벨 3은 발견 가능성(Discoverability)이 높고, 응답 자체에 대한 필요한 내용이 고스란히 담겨 있다. 리소스 뿐만 아니라 그 이상의 부가적인 정보까지 나타낸다는 점에서 HATEOAS가 진정한 REST냐 하는 문제는 아직도 논란의 여지가 있다.
+  * Level 2 + HATEOAS
+  * 다음 작업으로 어떤 것을 할 수 있는지, 그 작업을 하기 위해서 다뤄져야하는 URI에 어떤 action이 있는지 알려준다.
+  * Client측이 server가 제공하는 서비스를 일일히 찾아보지 않아도 된다.
+  * end point만 가지고도, 서버의 다음 URI값을 알 수 있다.
 
-출처) [[Spring] Level3 REST API 구현을 위한 HATEOAS 적용](https://transferhwang.tistory.com/125)  
+참고)  
+[[Spring] Level3 REST API 구현을 위한 HATEOAS 적용](https://transferhwang.tistory.com/125)  
+[Spring Boot를 이용한 RESTful Web Services 개발](https://www.inflearn.com/course/spring-boot-restful-web-services/dashboard) 강의의 RESTful API 설계 가이드 - Richardson Maturity Model 소개  
 
 `pom.xml`에 hateoas dependency 추가  
 ```xml
@@ -793,16 +817,92 @@ Spring Data JPA는 일반적인 JPA 기능과 달리 entity를 제어하기 위�
   : user 안에 데이터가 존재하는가
 * get()  
   : 데이터 값이 실제로 존재할 경우에만 데이터 값을 반환한다.
-* HATEOAS
+* HATEOAS  
   : 전체 user 보기 주소 값을 link한다.
   * HATEOAS 작업을 하기 위해서 해당하는 주소 값을 직접 명시하지 않고, 그 주소 값에 해당하는 메소드의 이름만으로 link 연결이 된다.
 
-### 5.6. JPA를 이용한 사용자 추가와 삭제 - POST/DELETE HTTP Method
+### 5.6. JPA를 이용한 사용자 추가와 삭제 - POST/DELETE HTTP Method  
 
-### 5.7. 게시물 관리를 위한 Post Entity 추가와 초기 데이터 생성
+### 5.7. 게시물 관리를 위한 Post Entity 추가와 초기 데이터 생성  
+한 명의 사용자는 여러 개의 게시물을 작성할 수 있다.  
 
+`Post.java`  
+```java
+  @ManyToOne(fetch = FetchType.LAZY
+  @JsonIgnore
+  private User user
+```
+* @ManyToOne  
+  : 데이터가 여러 개 올 수 있고, 하나의 값과 매칭될 수 있다.  
+* LAZY  
+  : 지연 로딩 방식. 사용자 entity를 조회할 때 매번 post entity가 같이 로딩되는 것이 아닌, post 데이터가 로드되는 시점에 필요한 사용자 데이터를 가지고 온다.
+  
+`User.java`
+```java
+  @OneToMany(mappedBy = "user")
+  private List<Post> posts;
+```
+* @OneToMany  
+  : 데이터를 1:N 으로 매칭 할 수 있다.
+  
+**@ManyToOne, @OneToMany**  
+: 관계형 데이터 베이스에서 말하는 관계를 이야기 한다. 관계가 형성되는 차수를 이야기한다.
+	
 ### 5.8. 게시물 조회를 위한 Post Entity와 User Entity와의 관계 설정
+	
+> **※ 무한순환참조현상 해결 방법 ※**  
+> 
+> * Users에서 Posts의 정보를 가져와서 JSON으로 변환하고, Posts에서는 Posts를 작성한 Users의 정보를 다시 JSON으로 변환하는 무한 반복이 생기는 현상.
+> * Users와 Posts 사이에서 양방향 JSON 변환이 반복되면서 무한히 서로 참조하여, 비정상적으로 무한한 데이터값이 response로 오게 된다.
+> 
+> 1. @OneToMany를 사용하는 entity(Users)에 @JsonManagedReference annotation을 붙인다.
+> 2. @ManyToOne을 사용하는 entity(Posts)에 @JsonBackReference annotation을 붙인다.
+
+참고)  
+[20190720 [문제해결] Infinite recursion (StackOverflowError)](https://pasudo123.tistory.com/350)
 
 ### 5.9. JPA를 이용한 새 게시물 추가 - POST HTTP Method
 
 ## 6. RESTful API 설계 가이드
+
+### 6.1. Richardson Maturity Model 소개
+  
+**Leonard Richardson의 Maturity Model**  
+* REST API를 개발할 때 확인해야 할 REST 방식의 주요 요소들을 3개 단계로 나눈 모델
+* Resorces, http Method, Hypermedia 등의 개념을 가지고 리소스를 표현한다.
+* 자세한 내용은 다음 내용 참고  
+  [Level3 단계의 REST API 구현을 위한 HATEOAS 적용](#41-level3-단계의-rest-api-구현을-위한-hateoas-적용)
+
+### 6.2. REST API 설계 시 고려해야 할 사항
+
+* Consumer first  
+  개발자 중심의 설계보다는 해당 API를 사용하는 소비자의 입장에서 간단 명료하고 직관적인 API로 설계되어야한다.
+* Make best use of HTTP  
+  HTTP 메소드와 Request, Response Header값과 같이 HTTP의 장점을 최대한 살려 설계해야 한다.
+* Request methods  
+  최소한 Maturity Model의 Level 2 Model 가지는 특징을 가지고 각 리소스 별로 적절한 HTTP 메소드를 제공해야한다.
+  * GET : 조회, 보기, 읽기 전용
+  * POST : 데이터 추가
+  * PUT : 리소스 변경
+  * DELETE : 리소스 삭제
+* Response Status  
+  적절한 상태코드를 결정해서 반환해야한다.
+  * 200
+  * 404
+  * 400
+  * 201
+  * 401
+* No secure info in URI
+* User plurals  
+  단수 형태의 URI가 아닌 복수 형태의 URI로 사용하고, 특정한 리소스를 지정하고 싶을 때는 다음 depth의 URL로 표현하는 것이 좋다.
+  * prefer `/users` to `/user`
+  * prefer `/users/1` to `/user/1`
+* User nouns for resources  
+  리소스에 대한 정보는 동사 형태보다는 명사 형태로 표시하는 것이 좋다.  
+  사용자 입장에서 더 직관적이고, 간단 명료하게 어떤 서비스, 리소스를 제공하는 API인지 명시할 수 있다.
+* For exceptions  
+  일관된 접근 end point를 사용하는 것이 좋다. 
+  * define a consistent approach
+    > /search
+    > PUT /gists/{id}/star
+    > DELETE /gists/{id}/star
