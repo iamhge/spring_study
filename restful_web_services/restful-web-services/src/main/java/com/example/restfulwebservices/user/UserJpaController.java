@@ -3,11 +3,12 @@ package com.example.restfulwebservices.user;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class UserJpaController {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PostRepository postRepository;
 
     @GetMapping("/users")
     public List<User> retrieveAllUsers() {
@@ -42,5 +45,59 @@ public class UserJpaController {
         resource.add(linkTo.withRel("all-users"));
 
         return resource;
+    }
+
+    @DeleteMapping("/users/{id}")
+    public void deleteUser(@PathVariable int id) {
+        userRepository.deleteById(id);
+    }
+
+    @PostMapping("/users")
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
+        User savedUser = userRepository.save(user);
+
+        // Response의 Header에서 확인 가능하다.
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest() // 현재 request path에서
+                .path("/{id}") // "/{id}"를 추가로 넣는다.
+                .buildAndExpand(savedUser.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).build();
+    }
+
+    @GetMapping("/users/{id}/posts")
+    public List<Post> retrieveAllPostsByUser(@PathVariable int id) {
+        // 데이터가 존재하지 않을 경우도 있으므로 Optional 타입으로 데이터를 받는다.
+        Optional<User> user = userRepository.findById(id);
+
+        // user 안에 데이터가 존재하지 않는다면
+        if (!user.isPresent()) {
+            throw new UserNotFoundException(String.format("ID[%s] not found", id));
+        }
+
+        return user.get().getPosts();
+    }
+
+    @PostMapping("/users/{id}/posts")
+    public ResponseEntity<User> createPost(@PathVariable int id, @RequestBody Post post) {
+        // 사용자 정보를 검색해서, 해당 정보의 id값을 post에 지정해야한다.
+        Optional<User> user = userRepository.findById(id);
+
+        // user 안에 데이터가 존재하지 않는다면
+        if (!user.isPresent()) {
+            throw new UserNotFoundException(String.format("ID[%s] not found", id));
+        }
+
+        post.setUser(user.get());
+        Post savedPost = postRepository.save(post);
+
+        // 생성된 post 정보의 uri값을 response로 보낸다.
+        // Response의 Header에서 확인 가능하다.
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedPost.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).build();
     }
 }

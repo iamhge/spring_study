@@ -3,6 +3,7 @@ package com.example.restfulwebservices.user;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -16,10 +17,12 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Size;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -46,4 +49,20 @@ public class User {
 //    @JsonIgnore
     @ApiModelProperty(notes = "사용자 주민번호를 입력해 주세요.")
     private String ssn;
+
+    // Post 데이터를 1:N으로 매칭 할  있다.
+    @JsonManagedReference
+    @OneToMany(mappedBy = "user")
+    private List<Post> posts;
+
+    // posts를 추가하면서, UserDaoService에서 생성자를 통해 초기 데이터를 넣을 때 오류가 발생한다.
+    // 기존에는 AllArgsConstructor annotation으로 생성자를 사용했기 때문이다.
+    // 따라서 posts를 제외한 다른 args들만 입력해서 객체를 생성할 수 있도록 한다.
+    public User(int id, String name, Date joinDate, String password, String ssn) {
+        this.id = id;
+        this.name = name;
+        this.joinDate = joinDate;
+        this.password = password;
+        this.ssn = ssn;
+    }
 }
