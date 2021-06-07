@@ -50,7 +50,16 @@ dependencies {
 
     // 추가
     compile('org.springframework.boot:spring-boot-starter-web')
-//    compile('org.projectlombok:lombok')
+    // p67
+    // 롬복은 프로젝트마다 설정해야 한다.
+    // 플러그인 설치는 한 번만 하면 되지만, build.gradle에 라이브러리를 추가하는 것과
+    // Enable annotation processing을 체크하는 것은 프로젝트마다 진행한다.
+    // compile('org.projectlombok:lombok')
+    // but 위와 같이 하면 롬복 constructor 생성 오류 발생. so 아래와 같이 수정.
+    // 참고 : https://github.com/jojoldu/freelec-springboot2-webservice/issues/78
+    // 참고 2 : https://github.com/jojoldu/freelec-springboot2-webservice/issues/2
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 //    compile('org.springframework.boot:spring-boot-starter-data-jpa')
 //    compile('org.springframework.boot:spring-boot-starter-mustache')
 //    compile('com.h2database:h2')
