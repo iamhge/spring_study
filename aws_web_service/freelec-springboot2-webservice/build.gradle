@@ -41,6 +41,9 @@ test {
 
 // dependencies : 프로젝트 개발에 필요한 의존성들을 선언
 dependencies {
+    implementation 'junit:junit:4.13.1'
+    implementation 'junit:junit:4.13.1'
+
     // 기존
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
