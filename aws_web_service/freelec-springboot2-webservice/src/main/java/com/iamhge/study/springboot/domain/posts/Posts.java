@@ -1,16 +1,18 @@
-// p88
+// p88, p122
 package com.iamhge.study.springboot.domain.posts;
 
+import com.iamhge.study.springboot.domain.BaseTimeEntity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
+// Posts : 실제 DB의 테이블과 매칭될 클래스
 @Getter // 클래스 내 모든 필드의 Getter 메소드 자동생성
 @NoArgsConstructor // 기본 생성자 자동 추가
 @Entity // 테이블과 링크될 클래스임을 나타낸다.
-public class Posts { // 실제 DB의 테이블과 매칭될 클래스
+public class Posts extends BaseTimeEntity {
 
     @Id // 해당 테이블의 PK필드를 나타낸다.
     @GeneratedValue(strategy = GenerationType.IDENTITY) // PK 생성 규칙을 나타낸다.
