@@ -1,8 +1,9 @@
-// p105, p113
+// p105, p113, p148
 package com.iamhge.study.springboot.service.posts;
 
 import com.iamhge.study.springboot.domain.posts.Posts;
 import com.iamhge.study.springboot.domain.posts.PostsRepository;
+import com.iamhge.study.springboot.web.dto.PostsListResponseDto;
 import com.iamhge.study.springboot.web.dto.PostsResponseDto;
 import com.iamhge.study.springboot.web.dto.PostsSaveRequestDto;
 import com.iamhge.study.springboot.web.dto.PostsUpdateRequestDto;
@@ -10,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -40,5 +43,15 @@ public class PostsService {
         Posts entity = postsRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
 
         return new PostsResponseDto(entity);
+    }
+
+    // readOnly = true : 트랜잭션 범위는 유지하되, 조회 기능만 남겨두어 조회속도가 개선된다.
+    @Transactional//(readOnly = true) // 나는 에러나서 일단 주석
+    public List<PostsListResponseDto> findAllDesc() {
+        return postsRepository.findAllDesc().stream()
+                // 람다식 사용. 실제 코드 : .map(posts -> new PostsListResponseDto(posts))
+                // postsRepository 결과로 넘어온 Posts의 Stream을 map울 통해 PostsListResponseDto 변환 -> List로 반환하는 메소드
+                .map(PostsListResponseDto::new)
+                .collect(Collectors.toList());
     }
 }
