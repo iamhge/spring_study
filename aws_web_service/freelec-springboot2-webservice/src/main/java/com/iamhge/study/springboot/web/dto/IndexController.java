@@ -1,9 +1,12 @@
-// p132
+// p132, p138
 package com.iamhge.study.springboot.web.dto;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+// 페이지에 관련된 컨트롤러는 모두 IndexController를 사용.
+@RequiredArgsConstructor
 @Controller
 public class IndexController {
     @GetMapping("/")
@@ -12,5 +15,10 @@ public class IndexController {
         // 앞 : src/main/resources/templates
         // 뒤 : .mustache
         return "index";
+    }
+
+    @GetMapping("/posts/save")
+    public String postsSave() {
+        return "posts-save";
     }
 }
