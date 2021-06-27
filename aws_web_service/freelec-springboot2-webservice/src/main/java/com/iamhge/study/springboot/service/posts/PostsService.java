@@ -1,4 +1,4 @@
-// p105, p113, p148
+// p105, p113, p148, p159
 package com.iamhge.study.springboot.service.posts;
 
 import com.iamhge.study.springboot.domain.posts.Posts;
@@ -53,5 +53,15 @@ public class PostsService {
                 // postsRepository 결과로 넘어온 Posts의 Stream을 map울 통해 PostsListResponseDto 변환 -> List로 반환하는 메소드
                 .map(PostsListResponseDto::new)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void delete (Long id) {
+        Posts posts = postsRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
+
+        // JpaRepository에서 이미 delete 메소드를 지원하고 있으니 이를 활용.
+        // entity를 파라미터로 삭제할 수도 있고, deleteById 메소드를 이용하면 id로 삭제할 수도 있다.
+        // 존재하는 Posts인지 확인을 위해 entity 조회 후 그대로 삭제.
+        postsRepository.delete(posts);
     }
 }
