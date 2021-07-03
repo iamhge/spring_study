@@ -1,0 +1,83 @@
+buildscript {
+    // ext : build.gradle에서 사용하는 전역변수 설정
+    ext {
+        springBootVersion = '2.5.0'
+    }
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+// 앞서 선언한 플러그인 의존성들을 적용할 것인지 결정
+// 아래 4개의 플러그인은 자바와 스프링 부트를 사용하기 위한 필수 플러그인들이다.
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+// io.spring.dependency-management : 스프링 부트의 의존성들을 관리
+apply plugin: 'io.spring.dependency-management'
+
+// 기존
+// 위의 방식과 함께 사용 시 에러 발생
+//plugins {
+//    id 'java'
+//}
+
+group 'com.iamhge.study'
+version '1.0-SNAPSHOT'
+
+// repositories : 각종 의존성 (라이브러리)들을 어떤 원격 저장소에서 받을지 정한다.
+repositories {
+    mavenCentral() // 기본적으로 많이 사용 (라이브러리 업로드 위해 많은 과정과 설정이 필요)
+    jcenter() // 라이브러리 업로드 난이도 때문에 많이 사용 (라이브러리 업로드가 간단)
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// dependencies : 프로젝트 개발에 필요한 의존성들을 선언
+dependencies {
+    implementation 'junit:junit:4.13.1'
+    implementation 'junit:junit:4.13.1'
+
+    // 기존
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    // 추가
+    compile('org.springframework.boot:spring-boot-starter-web')
+    // p67
+    // 롬복은 프로젝트마다 설정해야 한다.
+    // 플러그인 설치는 한 번만 하면 되지만, build.gradle에 라이브러리를 추가하는 것과
+    // Enable annotation processing을 체크하는 것은 프로젝트마다 진행한다.
+    // compile('org.projectlombok:lombok')
+    // but 위와 같이 하면 롬복 constructor 생성 오류 발생. so 아래와 같이 수정.
+    // 참고 : https://github.com/jojoldu/freelec-springboot2-webservice/issues/78
+    // 참고 2 : https://github.com/jojoldu/freelec-springboot2-webservice/issues/2
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    // p86
+    // Spring Data Jpa 추상화 라이브러리
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    // p131
+    // 스프링 부트에서 공식 지원한다. 의존성 하나만 추가하면 추가 설정 없이 설치가 끝
+    compile('org.springframework.boot:spring-boot-starter-mustache')
+    // p86
+    // 인메모리 관계형 데이터베이스
+    // 별도의 설치가 불필요
+    compile('com.h2database:h2')
+    // p179
+    // 소셜 로그인 등 클라이언트 입자에서 소셜 기능 구현 시 필요한 의존성
+    // spring-security-oauth2-client와 spring-security-oauth2-jose를 기본으로 관리해준다.
+    compile('org.springframework.boot:spring-boot-starter-oauth2-client')
+//    compile('org.springframework.session:spring-session-jdbc')
+//
+//    compile("org.mariadb.jdbc:mariadb-java-client")
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+//    testCompile("org.springframework.security:spring-security-test")
+}
